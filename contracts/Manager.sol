@@ -614,8 +614,11 @@ contract Manager is AccessControl, ReentrancyGuard, VRFConsumerBase, Ownable {
     // function to set the winner of a raffle. This is a temporary function to be used only by the owner
     // until chainlink integration is working
     /// @param _raffleId Id of the raffle
-    /// @param _normalizedRandomNumber
-    function setWinner(uint256 _raffleId) external nonReentrant onlyOwner {
+    /// @param _normalizedRandomNumber // random number
+    function setWinner(
+        uint256 _raffleId,
+        uint256 _normalizedRandomNumber
+    ) external nonReentrant onlyOwner {
         RaffleStruct storage raffle = raffles[_raffleId];
         FundingStructure storage funding = fundingList[_raffleId];
 
@@ -701,80 +704,81 @@ contract Manager is AccessControl, ReentrancyGuard, VRFConsumerBase, Ownable {
     // and the raffle is stuck in CLOSING_REQUESTED status
     /// @param _raffleId Id of the raffle
     /// @param _normalizedRandomNumber random number we want to use to set the winner
-//     function transferNFTAndFundsEmergency(
-//         uint256 _raffleId,
-//         uint256 _normalizedRandomNumber
-//     ) public nonReentrant onlyOwner {
-//         RaffleStruct storage raffle = raffles[_raffleId];
+    //     function transferNFTAndFundsEmergency(
+    //         uint256 _raffleId,
+    //         uint256 _normalizedRandomNumber
+    //     ) public nonReentrant onlyOwner {
+    //         RaffleStruct storage raffle = raffles[_raffleId];
 
-//         // Only callable when the raffle is requested to be closed
-//         require(
-//             raffle.status == STATUS.CLOSING_REQUESTED,
-//             "Raffle in wrong status"
-//         );
+    //         // Only callable when the raffle is requested to be closed
+    //         require(
+    //             raffle.status == STATUS.CLOSING_REQUESTED,
+    //             "Raffle in wrong status"
+    //         );
 
-//         raffle.randomNumber = _normalizedRandomNumber;
+    //         raffle.randomNumber = _normalizedRandomNumber;
 
-//         if (raffle.amountRaised == 0) {
-//             raffle.winner = raffle.seller;
-//         } else {
-//             raffle.winner = getWinnerAddressFromRandom(
-//                 _raffleId,
-//                 _normalizedRandomNumber
-//             );
-//         }
+    //         if (raffle.amountRaised == 0) {
+    //             raffle.winner = raffle.seller;
+    //         } else {
+    //             raffle.winner = getWinnerAddressFromRandom(
+    //                 _raffleId,
+    //                 _normalizedRandomNumber
+    //             );
+    //         }
 
-//         IERC721 _asset = IERC721(raffle.collateralAddress);
-//         _asset.transferFrom(address(this), raffle.winner, raffle.collateralId); // transfer the NFT to the winner
+    //         IERC721 _asset = IERC721(raffle.collateralAddress);
+    //         _asset.transferFrom(address(this), raffle.winner, raffle.collateralId); // transfer the NFT to the winner
 
-//         uint256 amountForPlatform = (raffle.amountRaised *
-//             raffle.platformPercentage) / 10000;
-//         uint256 amountForSeller = raffle.amountRaised - amountForPlatform;
+    //         uint256 amountForPlatform = (raffle.amountRaised *
+    //             raffle.platformPercentage) / 10000;
+    //         uint256 amountForSeller = raffle.amountRaised - amountForPlatform;
 
-//         // transfer 95% to the seller
-//         (bool sent, ) = raffle.seller.call{value: amountForSeller}("");
-//         require(sent, "Failed to send Ether");
+    //         // transfer 95% to the seller
+    //         (bool sent, ) = raffle.seller.call{value: amountForSeller}("");
+    //         require(sent, "Failed to send Ether");
 
-//         // transfer 5% to the platform
-//         (bool sent2, ) = destinationWallet.call{value: amountForPlatform}("");
-//         require(sent2, "Failed send Eth to MW");
+    //         // transfer 5% to the platform
+    //         (bool sent2, ) = destinationWallet.call{value: amountForPlatform}("");
+    //         require(sent2, "Failed send Eth to MW");
 
-//         raffle.status = STATUS.ENDED;
+    //         raffle.status = STATUS.ENDED;
 
-//         emit FeeTransferredToPlatform(_raffleId, amountForPlatform);
+    //         emit FeeTransferredToPlatform(_raffleId, amountForPlatform);
 
-//         emit RaffleEnded(
-//             _raffleId,
-//             raffle.winner,
-//             raffle.amountRaised,
-//             _normalizedRandomNumber
-//         );
-//     }
-// }
+    //         emit RaffleEnded(
+    //             _raffleId,
+    //             raffle.winner,
+    //             raffle.amountRaised,
+    //             _normalizedRandomNumber
+    //         );
+    //     }
+    // }
 
-// this is the method to be called by the owner to re-trigger getting a random
-// number when the raffle is stuck in CLOSING_REQUESTED status because the
-// Chainlink VRF callback function was never executed
-/// @param _id Id of the raffle
-/// @param _entriesSize length of the entries array of that raffle
-/// @return requestId Id generated by chainlink
-// function getRandomNumberEmergency(
-//     uint256 _id,
-//     uint256 _entriesSize
-// ) public onlyOwner returns (bytes32 requestId) {
-//     RaffleStruct storage raffle = raffles[_raffleId];
+    // this is the method to be called by the owner to re-trigger getting a random
+    // number when the raffle is stuck in CLOSING_REQUESTED status because the
+    // Chainlink VRF callback function was never executed
+    /// @param _id Id of the raffle
+    /// @param _entriesSize length of the entries array of that raffle
+    /// @return requestId Id generated by chainlink
+    // function getRandomNumberEmergency(
+    //     uint256 _id,
+    //     uint256 _entriesSize
+    // ) public onlyOwner returns (bytes32 requestId) {
+    //     RaffleStruct storage raffle = raffles[_raffleId];
 
-//     require(
-//         LINK.balanceOf(address(this)) >= fee,
-//         "Not enough LINK - please fund contract"
-//     );
-//     require(
-//         raffle.status == STATUS.CLOSING_REQUESTED,
-//         "Raffle in wrong status"
-//     );
-//     bytes32 result = requestRandomness(keyHash, fee);
+    //     require(
+    //         LINK.balanceOf(address(this)) >= fee,
+    //         "Not enough LINK - please fund contract"
+    //     );
+    //     require(
+    //         raffle.status == STATUS.CLOSING_REQUESTED,
+    //         "Raffle in wrong status"
+    //     );
+    //     bytes32 result = requestRandomness(keyHash, fee);
 
-//     // result is the requestId generated by chainlink. It is saved in a map linked to the param id
-//     chainlinkRaffleInfo[result] = RaffleInfo({id: _id, size: _entriesSize});
-//     return result;
-// }
+    //     // result is the requestId generated by chainlink. It is saved in a map linked to the param id
+    //     chainlinkRaffleInfo[result] = RaffleInfo({id: _id, size: _entriesSize});
+    //     return result;
+    // }
+}
